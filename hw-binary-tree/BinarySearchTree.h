@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include "Stack.h"
 using namespace std;
 
 struct Employee {
@@ -31,13 +32,12 @@ public:
 
         BinaryNode(Employee&& theElement, BinaryNode* lt, BinaryNode* rt)
             : element{ std::move(theElement) }, left{ lt }, right{ rt } { }
-
+        
         BinaryNode() {}
     };
 
     BinarySearchTree() : root{ nullptr }
     {
-        size = 0;
     }
 
     /**
@@ -54,7 +54,7 @@ public:
      */
     const Employee& findMin() const
     {
-        return Employee();
+        return findMin(root)->element;
     }
 
     /**
@@ -63,7 +63,7 @@ public:
      */
     const Employee& findMax() const
     {
-        return Employee();
+        return findMax(root)->element;
     }
 
     /**
@@ -71,7 +71,7 @@ public:
      */
     bool find(const int id) const
     {
-        return false;
+        find(id, root);
     }
 
     /**
@@ -80,7 +80,11 @@ public:
      */
     bool isEmpty() const
     {
-        return size <= 0;
+        if (root != nullptr)
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -88,7 +92,10 @@ public:
      */
     void makeEmpty()
     {
-        
+        while (!isEmpty())
+        {
+            remove(root->element.id, root);
+        }
     }
 
     /**
@@ -96,7 +103,7 @@ public:
      */
     void insert(const Employee& x)
     {
-        size++;
+        insert(x, root);
     }
 
     /**
@@ -104,7 +111,7 @@ public:
      */
     void remove(const int id)
     {
-        size--;
+        remove(id, root);
     }
 
     /**
@@ -112,12 +119,30 @@ public:
      */
     void report() const
     {
+        //use stack implementation
     }
 
 private:
-    unsigned size;
+
     BinaryNode* root;
 
+    BinaryNode* insert(BinaryNode*& t, const Employee& x)
+    {
+        if (t == nullptr)
+        {
+            BinaryNode* newNode = new BinaryNode(x, nullptr, nullptr);
+            return newNode;
+        }
+        if (t->element.id < x.id)
+        {
+            t->right = insert(t->right, x);
+        }
+        else
+        {
+            t->left = insert(t->left, x);
+        }
+        return t;
+    }
 
     /**
      * Internal method to insert into a subtree.
@@ -127,7 +152,7 @@ private:
      */
     void insert(const Employee& x, BinaryNode*& t)
     {
-        size++;
+        insert(t, x);
     }
 
     /**
@@ -138,7 +163,24 @@ private:
      */
     void remove(const int id, BinaryNode*& t)
     {
-        size--;
+        BinaryNode* delNode = findNode(id, t);
+        int children = 0;
+        if (delNode->left == nullptr) { children++; }
+        if (delNode->right == nullptr) { children++; }
+
+        if (children == 0)
+        {
+
+        }
+        else if (children == 1)
+        {
+
+        }
+        else
+        {
+
+        }
+
     }
 
     /**
@@ -147,7 +189,16 @@ private:
      */
     BinaryNode* findMin(BinaryNode* t) const
     {
-        return new BinaryNode();
+        if (isEmpty())
+        {
+            return nullptr;
+        }
+        BinaryNode* currentNode = t;
+        while (currentNode->left != nullptr)
+        {
+            currentNode = currentNode->left;
+        }
+        return currentNode;
     }
 
     /**
@@ -156,9 +207,46 @@ private:
      */
     BinaryNode* findMax(BinaryNode* t) const
     {
-        return new BinaryNode();
+        if (isEmpty())
+        {
+            return nullptr;
+        }
+        BinaryNode* currentNode = t;
+        while (currentNode->right != nullptr)
+        {
+            currentNode = currentNode->right;
+        }
+        return currentNode;
     }
 
+    // Code inspired by https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion/
+    BinaryNode* findNode(const int id, BinaryNode* t) const
+    {
+        Stack<BinaryNode*> s;
+        BinaryNode* curr = t;
+
+        while (curr != NULL || s.isEmpty() == false)
+        {
+            while (curr != NULL)
+            {
+                s.push(curr);
+                curr = curr->left;
+            }
+
+            curr = s.top();
+            BinaryNode* copy = s.pop();
+            if (copy->element.id == id)
+            {
+                return copy;
+            }
+
+            cout << curr->element.name << " ";
+
+            curr = curr->right;
+        }
+
+        return nullptr;
+    }
 
     /**
      * id is item to search for.
@@ -166,7 +254,11 @@ private:
      */
     bool find(const int id, BinaryNode* t) const
     {
-        return false;
+        if (findNode(id, t) == nullptr)
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -174,9 +266,9 @@ private:
      */
     void makeEmpty(BinaryNode*& t)
     {
-        while (! isEmpty())
+        while (!isEmpty())
         {
-            
+            remove(root->element.id, root);
         }
     }
 };
